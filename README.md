@@ -1,3 +1,4 @@
+<img width="1536" height="1024" alt="ACLR_Method" src="https://github.com/user-attachments/assets/597c99d1-79e8-4277-873c-75deefffebb9" />
 # Adaptive Cauchy LASSO Regression
 
 This repository contains the paper:
