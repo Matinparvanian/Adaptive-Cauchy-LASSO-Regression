@@ -1,34 +1,19 @@
-.libPaths("~/R/4.3.1")
-# ============================================================
-# Fast high-dimensional ACLR simulation: p >> n
-# Version: small ACLR tuning + final run
-# Main changes from the long version:
-#   1) Small representative tuning only
-#   2) AIC-ACLR and BIC-ACLR selected from ONE ACLR path
-#   3) AIC-CLR and BIC-CLR selected from ONE CLR path
-#   4) Reduced ACLR outer iterations
-#   5) Progress saved after each scenario
-#   6) QL-0.25, QL-0.5, and QL-0.75 added
-#   7) Boxplots saved for FNR, FPR, MAE, selected variables, and time
-# ============================================================
-
 set.seed(123)
 
-# ============================================================
-# 0) Packages
-# ============================================================
-required_packages <- c("MASS", "glmnet", "quantreg", "dplyr", "tidyr", "ggplot2")
-
-for (pkg in required_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg, repos = "https://cloud.r-project.org")
-  }
-  library(pkg, character.only = TRUE)
-}
+library(MASS)
+library(glmnet)
+library(quantreg)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 
 # ============================================================
 # 1) Global settings
 # ============================================================
+# Example 3 from the paper:
+# High dimensional scenario where p>>n:
+# p ∈ {100, 300, 500} and ntrain ∈ {50, 100}, with ntest = 30 and ε ∼ C(0, 1)
+
 
 p_values <- c(100, 300, 500)
 n_train_values <- c(50, 100)
@@ -36,13 +21,10 @@ rho_values <- c(0, 0.5, 0.75)
 
 n_test <- 30
 
-# Final simulation repetitions.
-# Use 100 first. After checking results, increase to 500 if needed.
+# Repetitions
 n_rep <- 500
 report_every <- 500
-
-# Small preliminary tuning.
-tuning_n_rep <- 10
+tuning_n_rep <- 30
 
 # Representative tuning scenarios only.
 p_values_tune <- c(300)
@@ -56,13 +38,12 @@ coef_tol <- 0.4
 eps_num <- 1e-8
 sigma_cauchy <- 1
 
-# CLR lambda grid. Reduced from 300 values to 120 values.
 lambda_grid_clr <- seq(0.01, 3, length.out = 120)
 
 # Quantile LASSO lambda grid.
 lambda_grid_ql <- exp(seq(log(0.01), log(20), length.out = 25))
 
-# Small ACLR tuning grid.
+# ACLR tuning grid.
 aclr_grid <- expand.grid(
   adaptive_gamma = c(0.4, 0.6, 0.9, 1),
   adaptive_eps   = c(0.05, 0.10),
